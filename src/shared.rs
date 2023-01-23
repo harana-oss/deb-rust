@@ -23,7 +23,7 @@ use std::path::{Path, PathBuf};
 
 // Represents the various architectures Deb supports, according to
 // https://wiki.debian.org/SupportedArchitectures
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DebArchitecture {
     All,
     Alpha,
@@ -132,7 +132,7 @@ impl DebArchitecture {
 // Used for Deb's Priority field
 // This is described in Debian's official documentation here:
 // https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DebPriority {
     Required,
     Important,
@@ -167,7 +167,7 @@ impl DebPriority {
 }
 
 // Used to configure which compression format is used for data and control archives
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DebCompression {
     Xz,
     Zstd,
@@ -204,7 +204,7 @@ impl DebFile {
     {
         Self {
             contents: buf,
-            mode: mode,
+            mode,
             path: PathBuf::from(&to),
         }
     }

@@ -53,7 +53,7 @@ fn read_simple_package() -> std::io::Result<()> {
         reader.version() == "0.1.0",
         reader.priority() == &DebPriority::Optional,
         reader.architecture() == &DebArchitecture::Amd64,
-        reader.essential() == false,
+        !reader.essential(),
         reader.depends() == &vec!["bash".to_string()],
         reader.maintainer() == "NotSludgeBomb <notsludgebomb@protonmail.com>",
         reader.description() == "test package for deb-rust",

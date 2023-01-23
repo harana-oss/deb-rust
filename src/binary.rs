@@ -978,7 +978,7 @@ impl DebArchive {
 
     // Converts DebArchive to DebPackage
     pub fn to_package(&self) -> std::io::Result<DebPackage> {
-        let mut output = DebPackage::new(&String::new());
+        let mut output = DebPackage::new("");
         output.compression = match self.compression {
             DebCompression::Xz => DebCompression::Xz,
             DebCompression::Zstd => DebCompression::Zstd,
@@ -1001,28 +1001,28 @@ impl DebArchive {
         let mut data_tar = tar::Archive::new(data_buf.as_slice());
 
         // Parsing control archive
-        for entry_result in control_tar.entries()?.into_iter() {
+        for entry_result in control_tar.entries()? {
             let mut entry = entry_result?;
             let mut buf: Vec<u8> = Vec::new();
             entry.read_to_end(&mut buf);
-            if &entry.path()? == &Cow::Borrowed(Path::new("control")) {
+            if entry.path()? == Cow::Borrowed(Path::new("control")) {
                 // Converting control file into DebControl struct
                 output.control = DebControl::deserialize(buf)?;
-            } else if &entry.path()? == &Cow::Borrowed(Path::new("config")) {
+            } else if entry.path()? == Cow::Borrowed(Path::new("config")) {
                 output = output.config_from_buf(buf);
-            } else if &entry.path()? == &Cow::Borrowed(Path::new("preinst")) {
+            } else if entry.path()? == Cow::Borrowed(Path::new("preinst")) {
                 output = output.preinst_from_buf(buf);
-            } else if &entry.path()? == &Cow::Borrowed(Path::new("postinst")) {
+            } else if entry.path()? == Cow::Borrowed(Path::new("postinst")) {
                 output = output.postinst_from_buf(buf);
-            } else if &entry.path()? == &Cow::Borrowed(Path::new("prerm")) {
+            } else if entry.path()? == Cow::Borrowed(Path::new("prerm")) {
                 output = output.prerm_from_buf(buf);
-            } else if &entry.path()? == &Cow::Borrowed(Path::new("postrm")) {
+            } else if entry.path()? == Cow::Borrowed(Path::new("postrm")) {
                 output = output.postrm_from_buf(buf);
             }
         }
 
         // Converting data entries to DebFile structs
-        for entry_result in data_tar.entries()?.into_iter() {
+        for entry_result in data_tar.entries()? {
             let mut entry = entry_result?;
             let mut buf: Vec<u8> = Vec::new();
             entry.read_to_end(&mut buf);
