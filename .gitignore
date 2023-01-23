@@ -1,0 +1,5 @@
+# Cargo output
+target/
+
+# Test packages
+*.deb
