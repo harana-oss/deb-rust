@@ -36,9 +36,8 @@ fn build_simple_package() -> std::io::Result<()> {
                 .to_string()
                 .as_bytes()
                 .to_vec(),
-            33188,
             PathBuf::from("/usr/bin/hello"),
-        ))
+        ).is_exec())
         .build()?
         .write(fs::File::create("test.deb")?)?;
     Ok(())

@@ -21,8 +21,6 @@ use crate::shared::*;
 use std::borrow::Cow;
 use std::fs;
 use std::io::{Error, ErrorKind, Read, Write};
-use std::ops::Deref;
-use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
 
 use regex::Regex;

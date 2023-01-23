@@ -198,15 +198,27 @@ impl DebFile {
     }
 
     // Creates DebFile from Vec<u8>
-    pub fn from_buf<T>(buf: Vec<u8>, mode: u32, to: T) -> Self
+    pub fn from_buf<T>(buf: Vec<u8>, to: T) -> Self
     where
         T: AsRef<std::ffi::OsStr>,
     {
         Self {
             contents: buf,
-            mode,
+            33188,
             path: PathBuf::from(&to),
         }
+    }
+
+    // Sets the file's mode to have executable permissions
+    pub fn is_exec(mut self) -> Self {
+        self.mode = 33261;
+        self
+    }
+
+    // Sets the file's mode to have rw- permissions
+    pub fn is_conf(mut self) -> Self {
+        self.mode = 33188;
+        self
     }
 
     // Sets the file's contents
