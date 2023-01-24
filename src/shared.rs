@@ -18,8 +18,9 @@
 
 use std::fs;
 use std::io::{Error, ErrorKind};
-use std::os::unix::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
 
 // Represents the various architectures Deb supports, according to
 // https://wiki.debian.org/SupportedArchitectures
@@ -183,6 +184,7 @@ pub struct DebFile {
 
 impl DebFile {
     // Creates DebFile from AsRef<Path>
+    #[cfg(unix)]
     pub fn from_path<F, T>(from: F, to: T) -> std::io::Result<Self>
     where
         F: AsRef<Path>,
@@ -191,6 +193,20 @@ impl DebFile {
         Ok(Self {
             contents: fs::read(&from)?,
             mode: fs::File::open(&from)?.metadata()?.mode(),
+            path: PathBuf::from(&to),
+        })
+    }
+
+    // Same function but for Windows, as file modes are a Unix feature
+    #[cfg(windows)]
+    pub fn from_path<F, T>(from: F, to: T) -> std::io::Result<Self>
+    where
+        F: AsRef<Path>,
+        T: AsRef<std::ffi::OsStr>,
+    {
+        Ok(Self {
+            contents: fs::read(&from)?,
+            mode: 33188,
             path: PathBuf::from(&to),
         })
     }

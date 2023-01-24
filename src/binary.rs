@@ -18,10 +18,10 @@
 
 use crate::shared::*;
 
-use std::borrow::Cow;
 use std::fs;
 use std::io::{Error, ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
+use std::borrow::Cow;
 
 use regex::Regex;
 use xz::read::XzDecoder;
