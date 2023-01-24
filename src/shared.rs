@@ -173,8 +173,6 @@ pub enum DebCompression {
     Zstd,
 }
 
-// Some structs used within the main structs
-
 // Used in the abstracted DebPackage struct to represent files in a package's archives
 #[derive(Debug)]
 pub struct DebFile {
@@ -204,7 +202,7 @@ impl DebFile {
     {
         Self {
             contents: buf,
-            33188,
+            mode: 33188,
             path: PathBuf::from(&to),
         }
     }

@@ -56,6 +56,7 @@ impl DebControl {
     // Converts DebControl into a dpkg-readable control file
     fn serialize(&self) -> Vec<u8> {
         let mut write_out = String::new();
+        // Binding temporary values to longer living variables
         let depends = self.depends.join(", ");
         let pre_depends = self.pre_depends.join(", ");
         let recommends = self.recommends.join(", ");
@@ -104,6 +105,7 @@ impl DebControl {
 
     // Converts a dpkg-readable control file into DebControl
     fn deserialize(control: Vec<u8>) -> std::io::Result<Self> {
+        // Converts comma-separated lists to Vec<String>
         fn split_to_vec(input: &str) -> Vec<String> {
             input
                 .split(',')
@@ -137,6 +139,9 @@ impl DebControl {
             Err(e) => return Err(Error::new(ErrorKind::Other, e)),
         };
 
+        // Splits control into Vec<&str> by line, and then splits
+        // each line into Vec<&str> by the key-value separating colon,
+        // ultimately resulting in Vec<Vec<&str>>
         let iterator = control_string
             .split('\n')
             .collect::<Vec<&str>>()
@@ -151,11 +156,14 @@ impl DebControl {
             .collect::<Vec<Vec<&str>>>();
 
         for line in iterator {
+            // This is to ensure that the trailing newline at a control file's
+            // end doesn't cause an error
             if line.len() == 1 {
                 continue;
             } else if line.len() != 2 {
                 return Err(Error::new(ErrorKind::Other, "control file is invalid"));
             }
+            // Matches the key and writes the value to the appropriate field
             match line[0] {
                 "Package" => {
                     output.name = line[1].to_string();
@@ -215,6 +223,9 @@ impl DebControl {
                     output.homepage = line[1].to_string();
                 }
                 "Built-Using" => {
+                    // Pulls the version number out of the `name (= ver)` format
+                    // in Built-Using
+                    // god i hate regex syntax
                     let ver_regex: Regex = Regex::new(r"\(= ([^()]*)\)$").unwrap();
                     let mut built_using: Vec<[String; 2]> = Vec::new();
                     let source = split_to_vec(line[1]);
@@ -243,21 +254,9 @@ impl DebControl {
     }
 }
 
-//
-// Library Interfaces
-//
-// The following structs are the actual interfaces allowing user's to build
-// and read Deb packages.
-//
-// The DebPackage struct is an abstracted view of a Deb package's contents,
-// allowing you to easily set and read various metadata fields, as well as add,
-// remove, and manipulate the package's files.
-//
-// DebArchive is an intermediary layer between the prior struct and an actual
-// .deb file. It exists to more fluently translate between the two.
-//
-
-// This struct is the interface for developer's intending to build a Deb package
+// This struct is an abstracted view of a Deb package's contents, allowing you to
+// easily set and read various metadata fields, as well as add, remove, and manipulate
+// the package's files.
 #[derive(Debug)]
 pub struct DebPackage {
     control: DebControl,         // Package's metadata
@@ -510,6 +509,7 @@ impl DebPackage {
         for file_result in walkdir::WalkDir::new(&path_from) {
             let file = file_result?;
             if file.path().is_file() {
+                // Cutting the `from` directory out of the path
                 let mut components = file.path().components();
                 for _i in path_from.components() {
                     components.next();
@@ -530,15 +530,14 @@ impl DebPackage {
     pub fn config_from_str(mut self, script: &str) -> Self {
         self.config = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
-            33188,
             "config",
-        ));
+        ).is_exec());
         self
     }
 
     // Sets config script from Vec<u8>
     pub fn config_from_buf(mut self, script: Vec<u8>) -> Self {
-        self.config = Some(DebFile::from_buf(script, 33188, "config"));
+        self.config = Some(DebFile::from_buf(script, "config").is_exec());
         self
     }
 
@@ -546,15 +545,14 @@ impl DebPackage {
     pub fn preinst_from_str(mut self, script: &str) -> Self {
         self.preinst = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
-            33188,
             "preinst",
-        ));
+        ).is_exec());
         self
     }
 
     // Sets preinst script from Vec<u8>
     pub fn preinst_from_buf(mut self, script: Vec<u8>) -> Self {
-        self.preinst = Some(DebFile::from_buf(script, 33188, "preinst"));
+        self.preinst = Some(DebFile::from_buf(script, "preinst").is_exec());
         self
     }
 
@@ -562,15 +560,14 @@ impl DebPackage {
     pub fn postinst_from_str(mut self, script: &str) -> Self {
         self.postinst = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
-            33188,
             "postinst",
-        ));
+        ).is_exec());
         self
     }
 
     // Sets postinst script from Vec<u8>
     pub fn postinst_from_buf(mut self, script: Vec<u8>) -> Self {
-        self.postinst = Some(DebFile::from_buf(script, 33188, "postinst"));
+        self.postinst = Some(DebFile::from_buf(script, "postinst").is_exec());
         self
     }
 
@@ -578,15 +575,14 @@ impl DebPackage {
     pub fn prerm_from_str(mut self, script: &str) -> Self {
         self.prerm = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
-            33188,
             "prerm",
-        ));
+        ).is_exec());
         self
     }
 
     // Sets prerm script from Vec<u8>
     pub fn prerm_from_buf(mut self, script: Vec<u8>) -> Self {
-        self.prerm = Some(DebFile::from_buf(script, 33188, "prerm"));
+        self.prerm = Some(DebFile::from_buf(script, "prerm").is_exec());
         self
     }
 
@@ -594,15 +590,14 @@ impl DebPackage {
     pub fn postrm_from_str(mut self, script: &str) -> Self {
         self.postrm = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
-            33188,
             "postrm",
-        ));
+        ).is_exec());
         self
     }
 
     // Sets postrm script from Vec<u8>
     pub fn postrm_from_buf(mut self, script: Vec<u8>) -> Self {
-        self.postrm = Some(DebFile::from_buf(script, 33188, "postrm"));
+        self.postrm = Some(DebFile::from_buf(script, "postrm").is_exec());
         self
     }
 
@@ -800,7 +795,6 @@ impl DebPackage {
         // Creating DebFile's from control and scripts
         let control_file = Some(DebFile::from_buf(
             self.control.serialize(),
-            33188,
             "control",
         ));
         let mut control_vec = vec![
@@ -869,7 +863,8 @@ impl DebPackage {
     }
 }
 
-// This struct is an itermediant point between DebPackage and an actual .deb file
+// DebArchive is an intermediary layer between the DebPackage struct and an actual
+// .deb file. It exists to more fluently translate between the two.
 pub struct DebArchive {
     control: Vec<u8>,            // Compressed tar archive containing package's metadata
     data: Vec<u8>,               // Compressed tar archive containing the package's contents
@@ -1027,7 +1022,7 @@ impl DebArchive {
             if let Cow::Borrowed(path) = entry.path()? {
                 output
                     .data
-                    .push(DebFile::from_buf(buf, entry.header().mode()?, path))
+                    .push(DebFile::from_buf(buf, path).set_mode(entry.header().mode()?))
             }
         }
 
