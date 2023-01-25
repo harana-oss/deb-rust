@@ -1,6 +1,6 @@
 /*
     deb-rust - Rust library for building and reading Deb packages
-    Copyright (C) 2022  NotSludgeBomb
+    Copyright (C) 2023  NotSludgeBomb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+//! Build and read binary Deb packages.
 
 use crate::shared::*;
 
@@ -254,9 +256,12 @@ impl DebControl {
     }
 }
 
-// This struct is an abstracted view of a Deb package's contents, allowing you to
-// easily set and read various metadata fields, as well as add, remove, and manipulate
-// the package's files.
+/// A high-level structure representing a Deb package.
+///
+/// For more information on the package's metadata, you can read
+/// [Debian's official documentation][1]
+///
+/// [1]: https://www.debian.org/doc/debian-policy/ch-controlfields.html#binary-package-control-files-debian-control
 #[derive(Debug)]
 pub struct DebPackage {
     control: DebControl,         // Package's metadata
@@ -270,7 +275,7 @@ pub struct DebPackage {
 }
 
 impl DebPackage {
-    // Creates a new DebPackage with `name` as it's name
+    /// Creates a new deb package with `name` as it's name.
     pub fn new(name: &str) -> Self {
         Self {
             control: DebControl {
@@ -303,48 +308,48 @@ impl DebPackage {
         }
     }
 
-    // Creates a DebReader from Read
+    /// Reads a deb package from `input`.
     pub fn from<R: Read>(mut input: R) -> std::io::Result<Self> {
         DebArchive::read(input)?.to_package()
     }
 
-    // Sets the package's name
+    /// Sets the package's name.
     pub fn set_name(mut self, name: &str) -> Self {
         self.control.name = name.to_string();
         self
     }
 
-    // Sets the package's version
+    /// Sets the package's version.
     pub fn set_version(mut self, version: &str) -> Self {
         self.control.version = version.to_string();
         self
     }
 
-    // Sets the package's priority
+    /// Sets the package's priority.
     pub fn set_priority(mut self, priority: DebPriority) -> Self {
         self.control.priority = priority;
         self
     }
 
-    // Sets the package's architecture
+    /// Sets the package's architecture.
     pub fn set_architecture(mut self, architecture: DebArchitecture) -> Self {
         self.control.architecture = architecture;
         self
     }
 
-    // Sets whether the package is essential
+    /// Sets whether the package is essential.
     pub fn set_essential(mut self, essential: bool) -> Self {
         self.control.essential = essential;
         self
     }
 
-    // Adds a single dependency from &str
+    /// Adds a single dependency from &str.
     pub fn with_depend(mut self, depend: &str) -> Self {
         self.control.depends.push(depend.to_string());
         self
     }
 
-    // Adds a number of dependencies from Vec<&str>
+    /// Adds a number of dependencies from Vec<&str>.
     pub fn with_depends(mut self, depends: Vec<&str>) -> Self {
         self.control
             .depends
@@ -352,13 +357,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single pre-dependency from &str
+    /// Adds a single pre-dependency from &str.
     pub fn with_pre_depend(mut self, depend: &str) -> Self {
         self.control.pre_depends.push(depend.to_string());
         self
     }
 
-    // Adds a number of dependencies from Vec<&str>
+    /// Adds a number of pre-dependencies from Vec<&str>.
     pub fn with_pre_depends(mut self, depends: Vec<&str>) -> Self {
         self.control
             .pre_depends
@@ -366,13 +371,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single recommendation from &str
+    /// Adds a single recommend from &str.
     pub fn with_recommend(mut self, recommend: &str) -> Self {
         self.control.recommends.push(recommend.to_string());
         self
     }
 
-    // Adds a number of recommendations from Vec<&str>
+    /// Adds a number of recommends from Vec<&str>.
     pub fn with_recommends(mut self, recommends: Vec<&str>) -> Self {
         self.control
             .recommends
@@ -380,13 +385,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single suggestion from &str
+    /// Adds a single suggest from &str.
     pub fn with_suggest(mut self, suggest: &str) -> Self {
         self.control.suggests.push(suggest.to_string());
         self
     }
 
-    // Adds a number of suggestions from Vec<&str>
+    /// Adds a number of suggestions from Vec<&str>.
     pub fn with_suggests(mut self, suggests: Vec<&str>) -> Self {
         self.control
             .suggests
@@ -394,14 +399,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single break from &str
-    // except I can't call the variable "break" bc thats a keyword lol
+    /// Adds a single break from &str.
     pub fn with_break(mut self, conflict: &str) -> Self {
         self.control.breaks.push(conflict.to_string());
         self
     }
 
-    // Adds a number of breaks from Vec<&str>
+    /// Adds a number of breaks from Vec<&str>.
     pub fn with_breaks(mut self, conflicts: Vec<&str>) -> Self {
         self.control
             .breaks
@@ -409,13 +413,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single conflict from &str
+    /// Adds a single conflict from &str.
     pub fn with_conflict(mut self, conflict: &str) -> Self {
         self.control.conflicts.push(conflict.to_string());
         self
     }
 
-    // Adds a number of conflicts from Vec<&str>
+    /// Adds a number of conflicts from Vec<&str>.
     pub fn with_conflicts(mut self, conflicts: Vec<&str>) -> Self {
         self.control
             .conflicts
@@ -423,13 +427,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single provide from &str
+    /// Adds a single provide from &str.
     pub fn with_provide(mut self, provide: &str) -> Self {
         self.control.provides.push(provide.to_string());
         self
     }
 
-    // Adds a number of provides from Vec<&str>
+    /// Adds a number of provides from Vec<&str>.
     pub fn with_provides(mut self, provides: Vec<&str>) -> Self {
         self.control
             .provides
@@ -437,13 +441,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single replacement from &str
+    /// Adds a single replace from &str.
     pub fn with_replace(mut self, replace: &str) -> Self {
         self.control.replaces.push(replace.to_string());
         self
     }
 
-    // Adds a number of replacements from Vec<&str>
+    /// Adds a number of replaces from Vec<&str>.
     pub fn with_replaces(mut self, replaces: Vec<&str>) -> Self {
         self.control
             .replaces
@@ -451,13 +455,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a single enhancement from &str
+    /// Adds a single enhance from &str.
     pub fn with_enhance(mut self, enhance: &str) -> Self {
         self.control.enhances.push(enhance.to_string());
         self
     }
 
-    // Adds a number of enhancements from Vec<&str>
+    /// Adds a number of enhancements from Vec<&str>.
     pub fn with_enhances(mut self, enhances: Vec<&str>) -> Self {
         self.control
             .enhances
@@ -465,25 +469,25 @@ impl DebPackage {
         self
     }
 
-    // Sets the package's maintainer
+    /// Sets the package's maintainer.
     pub fn set_maintainer(mut self, maintainer: &str) -> Self {
         self.control.maintainer = maintainer.to_string();
         self
     }
 
-    // Sets the package's description
+    /// Sets the package's description.
     pub fn set_description(mut self, description: &str) -> Self {
         self.control.description = description.to_string();
         self
     }
 
-    // Sets the package's homepage
+    /// Sets the package's homepage.
     pub fn set_homepage(mut self, homepage: &str) -> Self {
         self.control.homepage = homepage.to_string();
         self
     }
 
-    // Adds a "built using" package
+    /// Adds a "built using" package.
     pub fn with_built_using(mut self, using: &str, version: &str) -> Self {
         self.control
             .built_using
@@ -491,13 +495,13 @@ impl DebPackage {
         self
     }
 
-    // Adds a file to package data
+    /// Adds a file to the package.
     pub fn with_file(mut self, file: DebFile) -> Self {
         self.data.push(file);
         self
     }
 
-    // Recursively adds directory `from` to package as `to`
+    /// Recursively adds directory `from` to package as `to`.
     pub fn with_dir<P>(mut self, from: P, to: P) -> std::io::Result<Self>
     where
         P: AsRef<Path>,
@@ -520,13 +524,13 @@ impl DebPackage {
         Ok(self)
     }
 
-    // Clears the package's data
+    /// Clears the package's files.
     pub fn clear_files(mut self) -> Self {
         self.data = Vec::new();
         self
     }
 
-    // Sets config script from &str
+    /// Sets config script from &str.
     pub fn config_from_str(mut self, script: &str) -> Self {
         self.config = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
@@ -535,13 +539,13 @@ impl DebPackage {
         self
     }
 
-    // Sets config script from Vec<u8>
+    /// Sets config script from Vec<u8>.
     pub fn config_from_buf(mut self, script: Vec<u8>) -> Self {
         self.config = Some(DebFile::from_buf(script, "config").is_exec());
         self
     }
 
-    // Sets preinst script from &str
+    /// Sets preinst script from &str.
     pub fn preinst_from_str(mut self, script: &str) -> Self {
         self.preinst = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
@@ -550,13 +554,13 @@ impl DebPackage {
         self
     }
 
-    // Sets preinst script from Vec<u8>
+    /// Sets preinst script from Vec<u8>.
     pub fn preinst_from_buf(mut self, script: Vec<u8>) -> Self {
         self.preinst = Some(DebFile::from_buf(script, "preinst").is_exec());
         self
     }
 
-    // Sets postinst script from &str
+    /// Sets postinst script from &str.
     pub fn postinst_from_str(mut self, script: &str) -> Self {
         self.postinst = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
@@ -565,13 +569,13 @@ impl DebPackage {
         self
     }
 
-    // Sets postinst script from Vec<u8>
+    /// Sets postinst script from Vec<u8>.
     pub fn postinst_from_buf(mut self, script: Vec<u8>) -> Self {
         self.postinst = Some(DebFile::from_buf(script, "postinst").is_exec());
         self
     }
 
-    // Sets prerm script from &str
+    /// Sets prerm script from &str.
     pub fn prerm_from_str(mut self, script: &str) -> Self {
         self.prerm = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
@@ -580,13 +584,13 @@ impl DebPackage {
         self
     }
 
-    // Sets prerm script from Vec<u8>
+    /// Sets prerm script from Vec<u8>.
     pub fn prerm_from_buf(mut self, script: Vec<u8>) -> Self {
         self.prerm = Some(DebFile::from_buf(script, "prerm").is_exec());
         self
     }
 
-    // Sets postrm script from &str
+    /// Sets postrm script from &str.
     pub fn postrm_from_str(mut self, script: &str) -> Self {
         self.postrm = Some(DebFile::from_buf(
             script.as_bytes().to_vec(),
@@ -595,144 +599,144 @@ impl DebPackage {
         self
     }
 
-    // Sets postrm script from Vec<u8>
+    /// Sets postrm script from Vec<u8>.
     pub fn postrm_from_buf(mut self, script: Vec<u8>) -> Self {
         self.postrm = Some(DebFile::from_buf(script, "postrm").is_exec());
         self
     }
 
-    // Resets config script
+    /// Resets config script.
     pub fn no_config(mut self) -> Self {
         self.config = None;
         self
     }
 
-    // Resets preinst script
+    /// Resets preinst script.
     pub fn no_preinst(mut self) -> Self {
         self.preinst = None;
         self
     }
 
-    // Resets postinst script
+    /// Resets postinst script.
     pub fn no_postinst(mut self) -> Self {
         self.postinst = None;
         self
     }
 
-    // Resets prerm script
+    /// Resets prerm script.
     pub fn no_prerm(mut self) -> Self {
         self.prerm = None;
         self
     }
 
-    // Resets postrm script
+    /// Resets postrm script.
     pub fn no_postrm(mut self) -> Self {
         self.postrm = None;
         self
     }
 
-    // Sets the package's compression standard
+    /// Sets the package's compression standard.
     pub fn set_compression(mut self, compression: DebCompression) -> Self {
         self.compression = compression;
         self
     }
 
-    // Returns the package's name
+    /// Returns the package's name.
     pub fn name(&self) -> &str {
         &self.control.name
     }
 
-    // Returns the package's version
+    /// Returns the package's version.
     pub fn version(&self) -> &str {
         &self.control.version
     }
 
-    // Returns the package's priority
+    /// Returns the package's priority.
     pub fn priority(&self) -> &DebPriority {
         &self.control.priority
     }
 
-    // Returns the package's architecture
+    /// Returns the package's architecture.
     pub fn architecture(&self) -> &DebArchitecture {
         &self.control.architecture
     }
 
-    // Returns whether the package is essential
+    /// Returns whether the package is essential.
     pub fn essential(&self) -> bool {
         self.control.essential
     }
 
-    // Returns the package's depends
+    /// Returns the package's depends.
     pub fn depends(&self) -> &Vec<String> {
         &self.control.depends
     }
 
-    // Returns the package's pre-depends
+    /// Returns the package's pre-depends.
     pub fn pre_depends(&self) -> &Vec<String> {
         &self.control.pre_depends
     }
 
-    // Returns the package's recommends
+    /// Returns the package's recommends.
     pub fn recommends(&self) -> &Vec<String> {
         &self.control.recommends
     }
 
-    // Returns the package's suggests
+    /// Returns the package's suggests.
     pub fn suggests(&self) -> &Vec<String> {
         &self.control.suggests
     }
 
-    // Returns the package's breaks
+    /// Returns the package's breaks.
     pub fn breaks(&self) -> &Vec<String> {
         &self.control.breaks
     }
 
-    // Returns the package's conflicts
+    /// Returns the package's conflicts.
     pub fn conflicts(&self) -> &Vec<String> {
         &self.control.conflicts
     }
 
-    // Returns the package's provides
+    /// Returns the package's provides.
     pub fn provides(&self) -> &Vec<String> {
         &self.control.provides
     }
 
-    // Returns the package's replaces
+    /// Returns the package's replaces.
     pub fn replaces(&self) -> &Vec<String> {
         &self.control.replaces
     }
 
-    // Returns the package's enhances
+    /// Returns the package's enhances.
     pub fn enhances(&self) -> &Vec<String> {
         &self.control.enhances
     }
 
-    // Returns the package's maintainer
+    /// Returns the package's maintainer.
     pub fn maintainer(&self) -> &str {
         &self.control.maintainer
     }
 
-    // Returns the package's description
+    /// Returns the package's description.
     pub fn description(&self) -> &str {
         &self.control.description
     }
 
-    // Returns the package's homepage
+    /// Returns the package's homepage.
     pub fn homepage(&self) -> &str {
         &self.control.homepage
     }
 
-    // Returns the packages this package was built with
+    /// Returns the packages this package was built with.
     pub fn built_using(&self) -> &Vec<[String; 2]> {
         &self.control.built_using
     }
 
-    // Returns a vector of the packages files
+    /// Returns a vector of the packages files.
     pub fn files(&self) -> &Vec<DebFile> {
         &self.data
     }
 
-    // Returns the package's config script
+    /// Returns the package's config script.
     pub fn config(&self) -> Option<&Vec<u8>> {
         match &self.config {
             Some(file) => Some(file.contents()),
@@ -740,7 +744,7 @@ impl DebPackage {
         }
     }
 
-    // Returns the package's preinst script
+    /// Returns the package's preinst script.
     pub fn preinst(&self) -> Option<&Vec<u8>> {
         match &self.preinst {
             Some(file) => Some(file.contents()),
@@ -748,7 +752,7 @@ impl DebPackage {
         }
     }
 
-    // Returns the package's postinst script
+    /// Returns the package's postinst script.
     pub fn postinst(&self) -> Option<&Vec<u8>> {
         match &self.postinst {
             Some(file) => Some(file.contents()),
@@ -756,7 +760,7 @@ impl DebPackage {
         }
     }
 
-    // Returns the package's prerm script
+    /// Returns the package's prerm script.
     pub fn prerm(&self) -> Option<&Vec<u8>> {
         match &self.prerm {
             Some(file) => Some(file.contents()),
@@ -764,7 +768,7 @@ impl DebPackage {
         }
     }
 
-    // Returns the package's postrm script
+    /// Returns the package's postrm script.
     pub fn postrm(&self) -> Option<&Vec<u8>> {
         match &self.postrm {
             Some(file) => Some(file.contents()),
@@ -772,12 +776,12 @@ impl DebPackage {
         }
     }
 
-    // Returns the package's compression standard
+    /// Returns the package's compression standard.
     pub fn compression(&self) -> &DebCompression {
         &self.compression
     }
 
-    // Builds DebArchive from DebPackage
+    /// Builds the package into a DebArchive struct.
     pub fn build(&self) -> std::io::Result<DebArchive> {
         let mut output = DebArchive {
             control: Vec::new(),
@@ -863,8 +867,9 @@ impl DebPackage {
     }
 }
 
-// DebArchive is an intermediary layer between the DebPackage struct and an actual
-// .deb file. It exists to more fluently translate between the two.
+/// An intermediary layer between the DebPackage struct and an actual .deb file.
+///
+/// This struct allows you to actually read and write packages to the filesystem.
 pub struct DebArchive {
     control: Vec<u8>,            // Compressed tar archive containing package's metadata
     data: Vec<u8>,               // Compressed tar archive containing the package's contents
@@ -872,7 +877,7 @@ pub struct DebArchive {
 }
 
 impl DebArchive {
-    // Writes package to `out`
+    /// Writes package to `out`.
     pub fn write<W: Write>(&self, mut output: W) -> std::io::Result<()> {
         // Parsing the name of the control and data archives
         let (control_name, data_name) = match self.compression {
@@ -910,7 +915,7 @@ impl DebArchive {
         Ok(())
     }
 
-    // Reads package from `input`
+    /// Reads package from `input`.
     pub fn read<R: Read>(mut input: R) -> std::io::Result<Self> {
         // Preparing output
         let mut output = Self {
@@ -969,7 +974,7 @@ impl DebArchive {
         Ok(output)
     }
 
-    // Converts DebArchive to DebPackage
+    /// Converts DebArchive to DebPackage.
     pub fn to_package(&self) -> std::io::Result<DebPackage> {
         let mut output = DebPackage::new("");
         output.compression = match self.compression {

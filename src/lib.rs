@@ -1,6 +1,6 @@
 /*
     deb-rust - Rust library for building and reading Deb packages
-    Copyright (C) 2022  NotSludgeBomb
+    Copyright (C) 2023  NotSludgeBomb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,6 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
+//! A pure Rust library for building and reading Deb packages.
+//!
+//! As of now, deb-rust provides one interface for binary Deb packages, with planned
+//! support for source and source-control packages.
 
 #[allow(unused)]
 pub mod binary;

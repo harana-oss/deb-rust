@@ -1,6 +1,6 @@
 /*
     deb-rust - Rust library for building and reading Deb packages
-    Copyright (C) 2022  NotSludgeBomb
+    Copyright (C) 2023  NotSludgeBomb
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ use std::path::{Path, PathBuf};
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 
-// Represents the various architectures Deb supports, according to
-// https://wiki.debian.org/SupportedArchitectures
+/// Represents the various architectures Deb supports, according to
+/// https://wiki.debian.org/SupportedArchitectures
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebArchitecture {
     All,
@@ -58,7 +58,7 @@ pub enum DebArchitecture {
 }
 
 impl DebArchitecture {
-    // Converts DebArchitecture to &str
+    /// Converts DebArchitecture to &str.
     pub fn as_str(&self) -> &str {
         match self {
             DebArchitecture::All => "all",
@@ -93,7 +93,7 @@ impl DebArchitecture {
         }
     }
 
-    // Converts &str to DebArchitecture
+    /// Converts &str to DebArchitecture.
     pub fn from(input: &str) -> std::io::Result<Self> {
         match input {
             "all" => Ok(DebArchitecture::All),
@@ -130,9 +130,9 @@ impl DebArchitecture {
     }
 }
 
-// Used for Deb's Priority field
-// This is described in Debian's official documentation here:
-// https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority
+/// Used for Deb's Priority field.
+/// This is described in Debian's official documentation here:
+/// https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebPriority {
     Required,
@@ -143,7 +143,7 @@ pub enum DebPriority {
 }
 
 impl DebPriority {
-    // Converts DebPriority to &str
+    /// Converts DebPriority to &str.
     pub fn as_str(&self) -> &str {
         match self {
             DebPriority::Required => "required",
@@ -154,7 +154,7 @@ impl DebPriority {
         }
     }
 
-    // Converts &str to DebPriority
+    /// Converts &str to DebPriority.
     pub fn from(input: &str) -> std::io::Result<Self> {
         match input {
             "required" => Ok(DebPriority::Required),
@@ -167,14 +167,17 @@ impl DebPriority {
     }
 }
 
-// Used to configure which compression format is used for data and control archives
+/// Used to configure which compression format is used for data and control archives.
+/// Zstd is preferred, though XZ is available as a legacy option.
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebCompression {
     Xz,
     Zstd,
 }
 
-// Used in the abstracted DebPackage struct to represent files in a package's archives
+/// Used in the DebPackage struct to represent files in a package's archives.
+/// This struct contains the package's contents, permissions, and it's path in
+/// the final package.
 #[derive(Debug)]
 pub struct DebFile {
     contents: Vec<u8>, // The contents of the file
@@ -183,7 +186,30 @@ pub struct DebFile {
 }
 
 impl DebFile {
-    // Creates DebFile from AsRef<Path>
+    /// Creates a DebFile from a path.
+    ///
+    /// `from` is a path to a file on your system that you're trying to add to the package.
+    /// `to` is where the file will go once the package is installed on a user's system.
+    ///
+    /// On Unix systems, the file's mode will automatically be set based on `from`.
+    /// On Windows, the file's mode will be set to `33188`.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if `from` does not exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use deb_rust::*
+    /// use deb_rust::binary::DebPackage
+    ///
+    /// let mut package = DebPackage::new("example")
+    ///     .with_file(DebFile::from_path(
+    ///         "target/release/example",
+    ///         "/usr/bin/example",
+    ///     ));
+    /// ```
     #[cfg(unix)]
     pub fn from_path<F, T>(from: F, to: T) -> std::io::Result<Self>
     where
@@ -211,7 +237,12 @@ impl DebFile {
         })
     }
 
-    // Creates DebFile from Vec<u8>
+    /// Creates a DebFile from Vec<u8>.
+    ///
+    /// `buf` is a buffer which will be added as the file's contents.
+    /// `to` is where the file will go once the package is installed on a user's system.
+    ///
+    /// The file's mode is set to 33188. Permission's must be managed manually.
     pub fn from_buf<T>(buf: Vec<u8>, to: T) -> Self
     where
         T: AsRef<std::ffi::OsStr>,
@@ -223,47 +254,47 @@ impl DebFile {
         }
     }
 
-    // Sets the file's mode to have executable permissions
+    /// Sets the file's mode to have executable permissions.
     pub fn is_exec(mut self) -> Self {
         self.mode = 33261;
         self
     }
 
-    // Sets the file's mode to have rw- permissions
+    /// Sets the file's mode to have read/write permissions, without executable.
     pub fn is_conf(mut self) -> Self {
         self.mode = 33188;
         self
     }
 
-    // Sets the file's contents
+    /// Sets the file's contents to `contents`.
     pub fn set_contents(mut self, contents: Vec<u8>) -> Self {
         self.contents = contents;
         self
     }
 
-    // Sets the file's mode
+    /// Sets the file's mode to `mode`.
     pub fn set_mode(mut self, mode: u32) -> Self {
         self.mode = mode;
         self
     }
 
-    // Sets the file's path
+    /// Sets the file's path to `to`.
     pub fn set_path<T: AsRef<std::ffi::OsStr>>(mut self, to: T) -> Self {
         self.path = PathBuf::from(&to);
         self
     }
 
-    // Returns the file's contents
+    /// Returns the file's contents.
     pub fn contents(&self) -> &Vec<u8> {
         &self.contents
     }
 
-    // Returns the file's mode
+    /// Returns the file's mode.
     pub fn mode(&self) -> &u32 {
         &self.mode
     }
 
-    // Returns the file's path
+    /// Returns the file's path.
     pub fn path(&self) -> &PathBuf {
         &self.path
     }
