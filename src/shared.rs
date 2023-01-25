@@ -29,7 +29,6 @@ pub enum DebArchitecture {
     /// or configuration files.
     All,
     Alpha,
-    Arm,
     /// Arm versions 5T and 6
     Armel,
     /// Armv7 (hard float)
@@ -49,19 +48,18 @@ pub enum DebArchitecture {
     /// Little-endian 64-bit
     Mips64el,
     PowerPC,
-    PowerSPE,
     Ppc64,
     Ppc64el,
     Riscv64,
-    S390,
     S390x,
     Sh4,
     Sparc4,
     X32,
+    /// 32-bit x86 for GNU/Hurd
     HurdI386,
-    NetbsdI386,
-    NetbsdAlpha,
+    /// 32-bit x86 for FreeBSD
     KFreebsdI386,
+    /// 64-bit x86_64 for FreeBSD
     KFreebsdAmd64,
 }
 
