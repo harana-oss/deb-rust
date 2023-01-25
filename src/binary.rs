@@ -36,7 +36,7 @@
 //!         .with_file(DebFile::from_path(
 //!             "target/release/example",
 //!             "/usr/bin/example",
-//!         ).unwrap());
+//!         )?);
 //!     package.build()?.write(File::create("example.deb")?)?;
 //!     Ok(())
 //! }
@@ -303,7 +303,7 @@ pub struct DebPackage {
 }
 
 impl DebPackage {
-    /// Creates a new deb package with `name` as it's name.
+    /// Creates a new DebPackage with `name` as it's name.
     pub fn new(name: &str) -> Self {
         Self {
             control: DebControl {
@@ -336,7 +336,7 @@ impl DebPackage {
         }
     }
 
-    /// Reads a deb package from `input`.
+    /// Reads a DebPackage from `input`.
     pub fn from<R: Read>(mut input: R) -> std::io::Result<Self> {
         DebArchive::read(input)?.to_package()
     }
@@ -921,6 +921,10 @@ impl DebPackage {
 /// An intermediary layer between the DebPackage struct and an actual .deb file.
 ///
 /// This struct allows you to read and write built packages from and to the filesystem.
+///
+/// The contents of a DebArchive cannot be directly manipulated. To modify a DebArchive,
+/// you must first convert it to a DebPackage with the `to_package()` method, or use
+/// DebPackage's `from()` function, which reads to a DebArchive and converts automatically.
 pub struct DebArchive {
     control: Vec<u8>,            // Compressed tar archive containing package's metadata
     data: Vec<u8>,               // Compressed tar archive containing the package's contents

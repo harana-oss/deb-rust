@@ -2,6 +2,9 @@
 
 a pure Rust library for building and reading Deb packages
 
+deb-rust provides an easy to use, programmatic interface for reading and
+writing Deb packages.
+
 # Example
 
 ```rs

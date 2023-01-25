@@ -22,8 +22,7 @@ use std::path::{Path, PathBuf};
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 
-/// Represents the various architectures Deb supports, according to
-/// <https://wiki.debian.org/SupportedArchitectures>
+/// Represents the [various architectures Deb supports](https://wiki.debian.org/SupportedArchitectures).
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebArchitecture {
     /// For architecture independent packages, such as interpreted software
@@ -142,9 +141,7 @@ impl DebArchitecture {
     }
 }
 
-/// Used for Deb's Priority field.
-/// This is described in Debian's official documentation here:
-/// <https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority>
+/// Used for [Deb's Priority field](https://www.debian.org/doc/debian-policy/ch-archive.html#s-priorities).
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebPriority {
     Required,
