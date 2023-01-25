@@ -20,6 +20,7 @@ fn main() -> std::io::Result<()> {
     package = package
         .set_version("0.1.0")
         .set_description("deb-rust example")
+        .set_architecture(DebArchitecture::Amd64)
         .with_depend("bash")
         .with_file(DebFile::from_path(
             "target/release/example",
