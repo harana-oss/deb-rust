@@ -23,22 +23,31 @@ use std::path::{Path, PathBuf};
 use std::os::unix::fs::MetadataExt;
 
 /// Represents the various architectures Deb supports, according to
-/// https://wiki.debian.org/SupportedArchitectures
+/// <https://wiki.debian.org/SupportedArchitectures>
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebArchitecture {
+    /// For architecture independent packages, such as interpreted software
+    /// or configuration files.
     All,
     Alpha,
     Arm,
+    /// Arm versions 5T and 6
     Armel,
+    /// Armv7 (hard float)
     Armhf,
+    /// Armv8
     Arm64,
     Hppa,
+    /// 32-bit x86
     I386,
+    /// 64-bit x86_64
     Amd64,
     Ia64,
     M68k,
     Mips,
+    /// Little-endian 32-bit
     Mipsel,
+    /// Little-endian 64-bit
     Mips64el,
     PowerPC,
     PowerSPE,
@@ -94,6 +103,9 @@ impl DebArchitecture {
     }
 
     /// Converts &str to DebArchitecture.
+    ///
+    /// This function will return an error if the given string doesn't match
+    /// any architecture name.
     pub fn from(input: &str) -> std::io::Result<Self> {
         match input {
             "all" => Ok(DebArchitecture::All),
@@ -132,7 +144,7 @@ impl DebArchitecture {
 
 /// Used for Deb's Priority field.
 /// This is described in Debian's official documentation here:
-/// https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority
+/// <https://www.debian.org/doc/debian-policy/ch-controlfields.html#priority>
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebPriority {
     Required,
@@ -155,6 +167,9 @@ impl DebPriority {
     }
 
     /// Converts &str to DebPriority.
+    ///
+    /// This function will return in error if the given string doesn't match
+    /// any priority name.
     pub fn from(input: &str) -> std::io::Result<Self> {
         match input {
             "required" => Ok(DebPriority::Required),
@@ -168,6 +183,7 @@ impl DebPriority {
 }
 
 /// Used to configure which compression format is used for data and control archives.
+///
 /// Zstd is preferred, though XZ is available as a legacy option.
 #[derive(Debug, PartialEq, Eq)]
 pub enum DebCompression {
@@ -176,7 +192,8 @@ pub enum DebCompression {
 }
 
 /// Used in the DebPackage struct to represent files in a package's archives.
-/// This struct contains the package's contents, permissions, and it's path in
+///
+/// This struct contains the file's contents, permissions, and it's path in
 /// the final package.
 #[derive(Debug)]
 pub struct DebFile {
@@ -201,14 +218,14 @@ impl DebFile {
     /// # Example
     ///
     /// ```
-    /// use deb_rust::*
-    /// use deb_rust::binary::DebPackage
+    /// use deb_rust::DebFile;
+    /// use deb_rust::binary::DebPackage;
     ///
     /// let mut package = DebPackage::new("example")
     ///     .with_file(DebFile::from_path(
     ///         "target/release/example",
     ///         "/usr/bin/example",
-    ///     ));
+    ///     ).unwrap());
     /// ```
     #[cfg(unix)]
     pub fn from_path<F, T>(from: F, to: T) -> std::io::Result<Self>
@@ -237,12 +254,27 @@ impl DebFile {
         })
     }
 
-    /// Creates a DebFile from Vec<u8>.
+    /// Creates a DebFile from a buffer.
     ///
     /// `buf` is a buffer which will be added as the file's contents.
     /// `to` is where the file will go once the package is installed on a user's system.
     ///
     /// The file's mode is set to 33188. Permission's must be managed manually.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use deb_rust::DebFile;
+    /// use deb_rust::binary::DebPackage;
+    ///
+    /// let mut package = DebPackage::new("example")
+    ///     .with_file(DebFile::from_buf(
+    ///         "#!/usr/bin/bash\necho Hello world!"
+    ///             .as_bytes()
+    ///             .to_vec(),
+    ///         "/usr/bin/example",
+    ///     ).is_exec());
+    /// ```
     pub fn from_buf<T>(buf: Vec<u8>, to: T) -> Self
     where
         T: AsRef<std::ffi::OsStr>,

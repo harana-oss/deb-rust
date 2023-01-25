@@ -5,8 +5,8 @@ a pure Rust library for building and reading Deb packages
 # Example
 
 ```rs
-use deb_rust::*
-use deb_rust::binary::*
+use deb_rust::*;
+use deb_rust::binary::*;
 
 fn main() -> std::io::Result<()> {
     let mut package = DebPackage::new("example")
@@ -19,5 +19,4 @@ fn main() -> std::io::Result<()> {
         ));
     package.build()?.write()?;
 }
-
 ```

@@ -33,7 +33,6 @@ fn build_simple_package() -> std::io::Result<()> {
         .set_description("test package for deb-rust")
         .with_file(DebFile::from_buf(
             "#!/usr/bin/bash\necho hello world!"
-                .to_string()
                 .as_bytes()
                 .to_vec(),
             PathBuf::from("/usr/bin/hello"),

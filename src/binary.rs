@@ -17,6 +17,28 @@
 */
 
 //! Build and read binary Deb packages.
+//!
+//! Binary packages contain executable programs, documentation for said executables,
+//! configuration files, libraries, etc. Basically, anything that's not source code.
+//!
+//! # Example
+//!
+//! ```
+//! use deb_rust::DebFile;
+//! use deb_rust::binary::*;
+//!
+//! fn main() -> std::io::Result<()> {
+//!     let mut package = DebPackage::new("example")
+//!         .version("0.1.0")
+//!         .description("deb-rust example")
+//!         .with_depend("bash")
+//!         .with_file(DebFile::from_path(
+//!             "target/release/example",
+//!             "/usr/bin/example",
+//!         ).unwrap());
+//!     package.build()?.write()?;
+//! }
+//! ```
 
 use crate::shared::*;
 
@@ -259,9 +281,13 @@ impl DebControl {
 /// A high-level structure representing a Deb package.
 ///
 /// For more information on the package's metadata, you can read
-/// [Debian's official documentation][1]
+/// [Debian's official documentation][1].
+///
+/// As well, you can read Debian's definition for the package's
+/// [maintainer scripts][2].
 ///
 /// [1]: https://www.debian.org/doc/debian-policy/ch-controlfields.html#binary-package-control-files-debian-control
+/// [2]: https://www.debian.org/doc/debian-policy/ch-binary.html#maintainer-scripts
 #[derive(Debug)]
 pub struct DebPackage {
     control: DebControl,         // Package's metadata
@@ -502,6 +528,29 @@ impl DebPackage {
     }
 
     /// Recursively adds directory `from` to package as `to`.
+    ///
+    /// This adds all files and sub-directories to `to`. For example, if you
+    /// had a directory `test` containing the files `foo` and `bar`, then
+    /// you can add those files as `/usr/bin/foo` and `/usr/bin/bar` with
+    /// `with_dir("test", "/usr/bin")?;`
+    ///
+    /// This function isn't available when compiling on Windows, as it's utility
+    /// relies on being able to read the modes of the directory's children,
+    /// which is a feature Windows lacks.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if `from` doesn't exist.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use deb_rust::binary::DebPackage;
+    ///
+    /// let mut package = DebPackage::new(example)
+    ///     .with_dir("test", "/usr/bin")?;
+    /// ```
+    #[cfg(unix)]
     pub fn with_dir<P>(mut self, from: P, to: P) -> std::io::Result<Self>
     where
         P: AsRef<Path>,
@@ -524,7 +573,7 @@ impl DebPackage {
         Ok(self)
     }
 
-    /// Clears the package's files.
+    /// Removes all file's from the package.
     pub fn clear_files(mut self) -> Self {
         self.data = Vec::new();
         self
@@ -869,7 +918,7 @@ impl DebPackage {
 
 /// An intermediary layer between the DebPackage struct and an actual .deb file.
 ///
-/// This struct allows you to actually read and write packages to the filesystem.
+/// This struct allows you to read and write built packages from and to the filesystem.
 pub struct DebArchive {
     control: Vec<u8>,            // Compressed tar archive containing package's metadata
     data: Vec<u8>,               // Compressed tar archive containing the package's contents
@@ -877,7 +926,7 @@ pub struct DebArchive {
 }
 
 impl DebArchive {
-    /// Writes package to `out`.
+    /// Writes package to `output`.
     pub fn write<W: Write>(&self, mut output: W) -> std::io::Result<()> {
         // Parsing the name of the control and data archives
         let (control_name, data_name) = match self.compression {
@@ -975,6 +1024,12 @@ impl DebArchive {
     }
 
     /// Converts DebArchive to DebPackage.
+    ///
+    /// # Errors
+    ///
+    /// This function may return an error if the archive's control file (where all
+    /// of a package's metadata is stored) contains invalid syntax, or if part of the
+    /// package is corrupted and can't be read.
     pub fn to_package(&self) -> std::io::Result<DebPackage> {
         let mut output = DebPackage::new("");
         output.compression = match self.compression {
