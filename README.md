@@ -15,7 +15,9 @@ use deb_rust::*;
 use deb_rust::binary::*;
 
 fn main() -> std::io::Result<()> {
-    let mut package = DebPackage::new("example")
+    let mut package = DebPackage::new("example");
+    
+    package = package
         .set_version("0.1.0")
         .set_description("deb-rust example")
         .with_depend("bash")
@@ -23,6 +25,7 @@ fn main() -> std::io::Result<()> {
             "target/release/example",
             "/usr/bin/example",
         )?);
+        
     package.build()?.write(File::create("example.deb")?)?;
     Ok(())
 }
@@ -39,12 +42,13 @@ use deb_rust::binary::*;
 fn main() -> std::io::Result<()> {
     let package = DebPackage::from(File::open("example.deb")?)?;
     
-    let name = package.name(); // &str
-    let version = package.version(); // &str
+    let name = package.name();
+    let version = package.version();
     
     for file in package.files() {
         fs::write(file.path(), file.contents())?;
     }
+    Ok(())
 }
 ```
 
@@ -63,5 +67,6 @@ fn main() -> std::io::Result<()> {
         .set_description("some example idfk");
         
     package.build()?.write(File::create("new.deb")?)?;
+    Ok(())
 }
 ```
