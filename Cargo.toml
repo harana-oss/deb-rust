@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["NotSludgeBomb <notsludgebomb@protonmail.com>"]
 description = "Rust library for building and reading Deb packages"
 readme = "README.md"
-license = "GPL3"
+license = "GPL"
 repository = "https://codeberg.org/notsludgebomb/deb-rust"
 edition = "2021"
 
