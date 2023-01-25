@@ -18,9 +18,9 @@
 
 use std::fs;
 use std::io::{Error, ErrorKind};
-use std::path::{Path, PathBuf};
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
+use std::path::{Path, PathBuf};
 
 /// Represents the [various architectures Deb supports](https://wiki.debian.org/SupportedArchitectures).
 #[derive(Debug, PartialEq, Eq)]

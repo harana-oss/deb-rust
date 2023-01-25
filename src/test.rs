@@ -31,12 +31,13 @@ fn build_simple_package() -> std::io::Result<()> {
         .with_depend("bash")
         .set_maintainer("NotSludgeBomb <notsludgebomb@protonmail.com>")
         .set_description("test package for deb-rust")
-        .with_file(DebFile::from_buf(
-            "#!/usr/bin/bash\necho hello world!"
-                .as_bytes()
-                .to_vec(),
-            PathBuf::from("/usr/bin/hello"),
-        ).is_exec())
+        .with_file(
+            DebFile::from_buf(
+                "#!/usr/bin/bash\necho hello world!".as_bytes().to_vec(),
+                PathBuf::from("/usr/bin/hello"),
+            )
+            .is_exec(),
+        )
         .build()?
         .write(fs::File::create("test.deb")?)?;
     Ok(())
