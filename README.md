@@ -10,13 +10,14 @@ use deb_rust::binary::*;
 
 fn main() -> std::io::Result<()> {
     let mut package = DebPackage::new("example")
-        .version("0.1.0")
-        .description("deb-rust example")
+    .set_version("0.1.0")
+        .set_description("deb-rust example")
         .with_depend("bash")
         .with_file(DebFile::from_path(
             "target/release/example",
             "/usr/bin/example",
-        ));
-    package.build()?.write()?;
+        ).unwrap());
+    package.build()?.write(File::create("example.deb")?)?;
+    Ok(())
 }
 ```

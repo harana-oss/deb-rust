@@ -5,10 +5,11 @@ authors = ["NotSludgeBomb <notsludgebomb@protonmail.com>"]
 description = "Rust library for building and reading Deb packages"
 readme = "README.md"
 license = "GPL3"
-repository = "https://codeberg.org/notsludgebomb/debbuild"
+repository = "https://codeberg.org/notsludgebomb/deb-rust"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+doctest = false
 
 [dependencies]
 walkdir = "2.3.2"
