@@ -44,10 +44,10 @@
 
 use crate::shared::*;
 
+use std::borrow::Cow;
 use std::fs;
 use std::io::{Error, ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
-use std::borrow::Cow;
 
 use regex::Regex;
 use xz::read::XzDecoder;
@@ -583,10 +583,7 @@ impl DebPackage {
 
     /// Sets config script from &str.
     pub fn config_from_str(mut self, script: &str) -> Self {
-        self.config = Some(DebFile::from_buf(
-            script.as_bytes().to_vec(),
-            "config",
-        ).is_exec());
+        self.config = Some(DebFile::from_buf(script.as_bytes().to_vec(), "config").is_exec());
         self
     }
 
@@ -598,10 +595,7 @@ impl DebPackage {
 
     /// Sets preinst script from &str.
     pub fn preinst_from_str(mut self, script: &str) -> Self {
-        self.preinst = Some(DebFile::from_buf(
-            script.as_bytes().to_vec(),
-            "preinst",
-        ).is_exec());
+        self.preinst = Some(DebFile::from_buf(script.as_bytes().to_vec(), "preinst").is_exec());
         self
     }
 
@@ -613,10 +607,7 @@ impl DebPackage {
 
     /// Sets postinst script from &str.
     pub fn postinst_from_str(mut self, script: &str) -> Self {
-        self.postinst = Some(DebFile::from_buf(
-            script.as_bytes().to_vec(),
-            "postinst",
-        ).is_exec());
+        self.postinst = Some(DebFile::from_buf(script.as_bytes().to_vec(), "postinst").is_exec());
         self
     }
 
@@ -628,10 +619,7 @@ impl DebPackage {
 
     /// Sets prerm script from &str.
     pub fn prerm_from_str(mut self, script: &str) -> Self {
-        self.prerm = Some(DebFile::from_buf(
-            script.as_bytes().to_vec(),
-            "prerm",
-        ).is_exec());
+        self.prerm = Some(DebFile::from_buf(script.as_bytes().to_vec(), "prerm").is_exec());
         self
     }
 
@@ -643,10 +631,7 @@ impl DebPackage {
 
     /// Sets postrm script from &str.
     pub fn postrm_from_str(mut self, script: &str) -> Self {
-        self.postrm = Some(DebFile::from_buf(
-            script.as_bytes().to_vec(),
-            "postrm",
-        ).is_exec());
+        self.postrm = Some(DebFile::from_buf(script.as_bytes().to_vec(), "postrm").is_exec());
         self
     }
 
@@ -848,10 +833,7 @@ impl DebPackage {
         let mut data_tar = tar::Builder::new(Vec::new());
 
         // Creating DebFile's from control and scripts
-        let control_file = Some(DebFile::from_buf(
-            self.control.serialize(),
-            "control",
-        ));
+        let control_file = Some(DebFile::from_buf(self.control.serialize(), "control"));
         let mut control_vec = vec![
             &control_file,
             &self.config,
@@ -1086,9 +1068,10 @@ impl DebArchive {
             let mut buf: Vec<u8> = Vec::new();
             entry.read_to_end(&mut buf);
             if let Cow::Borrowed(path) = entry.path()? {
-                output
-                    .data
-                    .push(DebFile::from_buf(buf, path).set_mode(entry.header().mode()?))
+                output.data.push(
+                    DebFile::from_buf(buf, format!("/{}", path.display()))
+                        .set_mode(entry.header().mode()?),
+                )
             }
         }
 
