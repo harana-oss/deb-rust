@@ -198,7 +198,7 @@ impl DebFile {
     ///
     /// # Errors
     ///
-    /// This function will return an error if `from` does not exist.
+    /// This function will return an error if `from` does not exist or can't be read.
     ///
     /// # Example
     ///

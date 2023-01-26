@@ -44,6 +44,7 @@
 //!     package.build()?.write(File::create("example.deb")?)?;
 //!
 //!     Ok(())
+//! }
 //! ```
 
 use crate::shared::*;
