@@ -1,9 +1,9 @@
 # deb-rust
 
-a pure Rust library for building and reading Deb packages
+a pure Rust library for building and reading Deb packages.
 
 deb-rust provides an easy to use, programmatic interface for reading and
-writing Deb packages.
+writing Deb packages. It currently supports only binary deb packages.
 
 # Examples
 
@@ -28,6 +28,7 @@ fn main() -> std::io::Result<()> {
         )?);
         
     package.build()?.write(File::create("example.deb")?)?;
+    
     Ok(())
 }
 ```
@@ -49,6 +50,7 @@ fn main() -> std::io::Result<()> {
     for file in package.files() {
         fs::write(file.path(), file.contents())?;
     }
+    
     Ok(())
 }
 ```
@@ -68,6 +70,7 @@ fn main() -> std::io::Result<()> {
         .set_description("some example idfk");
         
     package.build()?.write(File::create("new.deb")?)?;
+    
     Ok(())
 }
 ```

@@ -20,6 +20,13 @@
 //!
 //! As of now, deb-rust provides one interface for binary Deb packages, with planned
 //! support for source and source-control packages.
+//!
+//! This documentation is *not* intended to provide an explanation for how the Deb format
+//! works, and how dpkg understands it. This documentation is only to explain how to interface
+//! with the format using deb-rust. For information on the format itself,
+//! check the [Debian policy manual][1]
+//!
+//! [1]: https://www.debian.org/doc/debian-policy/index.html
 
 #[allow(unused)]
 pub mod binary;

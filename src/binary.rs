@@ -25,21 +25,25 @@
 //!
 //! ```
 //! use std::fs::File;
-//! use deb_rust::DebFile;
+//! use deb_rust::*;
 //! use deb_rust::binary::*;
 //!
 //! fn main() -> std::io::Result<()> {
-//!     let mut package = DebPackage::new("example")
+//!     let mut package = DebPackage::new("example");
+//!
+//!     package = package
 //!         .set_version("0.1.0")
 //!         .set_description("deb-rust example")
+//!         .set_architecture(DebArchitecture::Amd64)
 //!         .with_depend("bash")
 //!         .with_file(DebFile::from_path(
 //!             "target/release/example",
 //!             "/usr/bin/example",
 //!         )?);
+//!
 //!     package.build()?.write(File::create("example.deb")?)?;
+//!
 //!     Ok(())
-//! }
 //! ```
 
 use crate::shared::*;
@@ -282,8 +286,8 @@ impl DebControl {
 
 /// A high-level structure representing a Deb package.
 ///
-/// For more information on the package's metadata, you can read
-/// [Debian's official documentation][1].
+/// For binary package's, it may be helpful to read
+/// [Debian's documentation on binary packages' metadata][1].
 ///
 /// As well, you can read Debian's definition for the package's
 /// [maintainer scripts][2].
@@ -906,7 +910,7 @@ impl DebPackage {
         // Adding files to control tar
         for file in control_vec.into_iter().flatten() {
             let mut file_header = tar::Header::new_gnu();
-            // We don't have to worry about the path being absolute as all
+            // We don't have to worry about the path being absolute here as all
             // scripts can only have relative paths using the struct's methods
             file_header.set_path(file.path())?;
             file_header.set_size(file.contents().len().try_into().unwrap());
@@ -918,6 +922,8 @@ impl DebPackage {
         // Adding files to data tar
         for file in &self.data {
             let mut file_header = tar::Header::new_gnu();
+            // We have to strip the root directory if the path is absolute
+            // as the tar library doesn't allow absolute paths
             if file.path().is_absolute() {
                 match file.path().strip_prefix("/") {
                     Ok(path) => {
@@ -965,8 +971,8 @@ impl DebPackage {
 /// This struct allows you to read and write built packages from and to the filesystem.
 ///
 /// The contents of a DebArchive cannot be directly manipulated. To modify a DebArchive,
-/// you must first convert it to a DebPackage with the `to_package()` method, or use
-/// DebPackage's `from()` function, which reads to a DebArchive and converts automatically.
+/// you must first convert it to a DebPackage with the `to_package()` method, or open the
+/// file using DebPackage's `from()` function.
 pub struct DebArchive {
     control: Vec<u8>,            // Compressed tar archive containing package's metadata
     data: Vec<u8>,               // Compressed tar archive containing the package's contents
