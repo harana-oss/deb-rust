@@ -18,8 +18,8 @@
 
 //! A pure Rust library for building and reading Deb packages.
 //!
-//! As of now, deb-rust provides one interface for binary Deb packages, with planned
-//! support for source and source-control packages.
+//! deb-rust provides an easy to use, programmatic interface for reading and
+//! writing Deb packages. It currently supports only binary deb packages.
 //!
 //! This documentation is *not* intended to provide an explanation for how the Deb format
 //! works, nor how dpkg understands it. This documentation is only to explain how to interface
