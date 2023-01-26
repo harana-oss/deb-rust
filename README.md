@@ -5,6 +5,8 @@ A pure Rust library for building and reading Deb packages.
 deb-rust provides an easy to use, programmatic interface for reading and
 writing Deb packages. It currently supports only binary deb packages.
 
+[You can use deb-rust via crates.io](https://crates.io/crates/deb-rust)
+
 # Examples
 
 ### Writing
