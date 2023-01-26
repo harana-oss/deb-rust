@@ -1,10 +1,11 @@
 [package]
 name = "deb-rust"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["NotSludgeBomb <notsludgebomb@protonmail.com>"]
 description = "Rust library for building and reading Deb packages"
 readme = "README.md"
 license = "GPL-3.0-or-later"
+keywords = ["deb", "dpkg", "apt", "debian", "ubuntu"]
 repository = "https://codeberg.org/notsludgebomb/deb-rust"
 edition = "2021"
 
