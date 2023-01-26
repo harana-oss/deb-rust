@@ -385,6 +385,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets dependencies.
+    pub fn no_depends(mut self) -> Self {
+        self.control.depends = Vec::new();
+        self
+    }
+
     /// Adds a single pre-dependency from &str.
     pub fn with_pre_depend(mut self, depend: &str) -> Self {
         self.control.pre_depends.push(depend.to_string());
@@ -396,6 +402,12 @@ impl DebPackage {
         self.control
             .pre_depends
             .append(&mut depends.iter().map(|str| str.to_string()).collect());
+        self
+    }
+
+    /// Resets pre-dependencies.
+    pub fn no_pre_depends(mut self) -> Self {
+        self.control.pre_depends = Vec::new();
         self
     }
 
@@ -413,17 +425,29 @@ impl DebPackage {
         self
     }
 
+    /// Resets recommends.
+    pub fn no_recommends(mut self) -> Self {
+        self.control.recommends = Vec::new();
+        self
+    }
+
     /// Adds a single suggest from &str.
     pub fn with_suggest(mut self, suggest: &str) -> Self {
         self.control.suggests.push(suggest.to_string());
         self
     }
 
-    /// Adds a number of suggestions from Vec<&str>.
+    /// Adds a number of suggests from Vec<&str>.
     pub fn with_suggests(mut self, suggests: Vec<&str>) -> Self {
         self.control
             .suggests
             .append(&mut suggests.iter().map(|str| str.to_string()).collect());
+        self
+    }
+
+    /// Resets suggests.
+    pub fn no_suggests(mut self) -> Self {
+        self.control.suggests = Vec::new();
         self
     }
 
@@ -441,6 +465,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets breaks.
+    pub fn no_breaks(mut self) -> Self {
+        self.control.breaks = Vec::new();
+        self
+    }
+
     /// Adds a single conflict from &str.
     pub fn with_conflict(mut self, conflict: &str) -> Self {
         self.control.conflicts.push(conflict.to_string());
@@ -452,6 +482,12 @@ impl DebPackage {
         self.control
             .conflicts
             .append(&mut conflicts.iter().map(|str| str.to_string()).collect());
+        self
+    }
+
+    /// Resets conflicts.
+    pub fn no_conflicts(mut self) -> Self {
+        self.control.conflicts = Vec::new();
         self
     }
 
@@ -469,6 +505,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets provides.
+    pub fn no_provides(mut self) -> Self {
+        self.control.provides = Vec::new();
+        self
+    }
+
     /// Adds a single replace from &str.
     pub fn with_replace(mut self, replace: &str) -> Self {
         self.control.replaces.push(replace.to_string());
@@ -483,17 +525,29 @@ impl DebPackage {
         self
     }
 
+    /// Resets replaces.
+    pub fn no_replaces(mut self) -> Self {
+        self.control.replaces = Vec::new();
+        self
+    }
+
     /// Adds a single enhance from &str.
     pub fn with_enhance(mut self, enhance: &str) -> Self {
         self.control.enhances.push(enhance.to_string());
         self
     }
 
-    /// Adds a number of enhancements from Vec<&str>.
+    /// Adds a number of enhances from Vec<&str>.
     pub fn with_enhances(mut self, enhances: Vec<&str>) -> Self {
         self.control
             .enhances
             .append(&mut enhances.iter().map(|str| str.to_string()).collect());
+        self
+    }
+
+    /// Resets enhances.
+    pub fn no_enhances(mut self) -> Self {
+        self.control.enhances = Vec::new();
         self
     }
 
@@ -520,6 +574,12 @@ impl DebPackage {
         self.control
             .built_using
             .push([using.to_string(), version.to_string()]);
+        self
+    }
+
+    /// Resets built-using.
+    pub fn no_built_using(mut self) -> Self {
+        self.control.built_using = Vec::new();
         self
     }
 
@@ -593,6 +653,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets config script.
+    pub fn no_config(mut self) -> Self {
+        self.config = None;
+        self
+    }
+
     /// Sets preinst script from &str.
     pub fn preinst_from_str(mut self, script: &str) -> Self {
         self.preinst = Some(DebFile::from_buf(script.as_bytes().to_vec(), "preinst").is_exec());
@@ -602,6 +668,12 @@ impl DebPackage {
     /// Sets preinst script from Vec<u8>.
     pub fn preinst_from_buf(mut self, script: Vec<u8>) -> Self {
         self.preinst = Some(DebFile::from_buf(script, "preinst").is_exec());
+        self
+    }
+
+    /// Resets preinst script.
+    pub fn no_preinst(mut self) -> Self {
+        self.preinst = None;
         self
     }
 
@@ -617,6 +689,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets postinst script.
+    pub fn no_postinst(mut self) -> Self {
+        self.postinst = None;
+        self
+    }
+
     /// Sets prerm script from &str.
     pub fn prerm_from_str(mut self, script: &str) -> Self {
         self.prerm = Some(DebFile::from_buf(script.as_bytes().to_vec(), "prerm").is_exec());
@@ -629,6 +707,12 @@ impl DebPackage {
         self
     }
 
+    /// Resets prerm script.
+    pub fn no_prerm(mut self) -> Self {
+        self.prerm = None;
+        self
+    }
+
     /// Sets postrm script from &str.
     pub fn postrm_from_str(mut self, script: &str) -> Self {
         self.postrm = Some(DebFile::from_buf(script.as_bytes().to_vec(), "postrm").is_exec());
@@ -638,30 +722,6 @@ impl DebPackage {
     /// Sets postrm script from Vec<u8>.
     pub fn postrm_from_buf(mut self, script: Vec<u8>) -> Self {
         self.postrm = Some(DebFile::from_buf(script, "postrm").is_exec());
-        self
-    }
-
-    /// Resets config script.
-    pub fn no_config(mut self) -> Self {
-        self.config = None;
-        self
-    }
-
-    /// Resets preinst script.
-    pub fn no_preinst(mut self) -> Self {
-        self.preinst = None;
-        self
-    }
-
-    /// Resets postinst script.
-    pub fn no_postinst(mut self) -> Self {
-        self.postinst = None;
-        self
-    }
-
-    /// Resets prerm script.
-    pub fn no_prerm(mut self) -> Self {
-        self.prerm = None;
         self
     }
 
