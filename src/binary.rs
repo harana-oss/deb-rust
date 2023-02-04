@@ -94,6 +94,7 @@ impl DebControl {
         let suggests = self.suggests.join(", ");
         let breaks = self.breaks.join(", ");
         let conflicts = self.conflicts.join(", ");
+        let provides = self.provides.join(", ");
         let enhances = self.enhances.join(", ");
         let built_using = {
             let mut output: Vec<String> = Vec::new();
@@ -120,6 +121,7 @@ impl DebControl {
             ["Suggests", suggests.as_str()],
             ["Breaks", breaks.as_str()],
             ["Conflicts", conflicts.as_str()],
+            ["Provides", provides.as_str()],
             ["Enhances", enhances.as_str()],
             ["Maintainer", self.maintainer.as_str()],
             ["Description", self.description.as_str()],
