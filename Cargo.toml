@@ -1,6 +1,6 @@
 [package]
 name = "deb-rust"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["NotSludgeBomb <notsludgebomb@protonmail.com>"]
 description = "Rust library for building and reading Deb packages"
 readme = "README.md"
