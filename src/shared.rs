@@ -185,6 +185,7 @@ pub struct DebFile {
     contents: Vec<u8>, // The contents of the file
     mode: u32,         // The file's permissions in octal form
     path: PathBuf,     // The path the file goes to in the archive
+    mtime: u64,        // The modification time
 }
 
 impl DebFile {
@@ -222,6 +223,7 @@ impl DebFile {
             contents: fs::read(&from)?,
             mode: fs::File::open(&from)?.metadata()?.mode(),
             path: PathBuf::from(&to),
+            mtime: fs::File::open(&from)?.metadata()?.modified()?.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap().as_secs(),
         })
     }
 
@@ -236,6 +238,7 @@ impl DebFile {
             contents: fs::read(&from)?,
             mode: 33188,
             path: PathBuf::from(&to),
+            mtime: 13332,
         })
     }
 
@@ -268,6 +271,7 @@ impl DebFile {
             contents: buf,
             mode: 33188,
             path: PathBuf::from(&to),
+            mtime: chrono::Utc::now().timestamp() as u64,
         }
     }
 
@@ -314,5 +318,10 @@ impl DebFile {
     /// Returns the file's path.
     pub fn path(&self) -> &PathBuf {
         &self.path
+    }
+
+    /// Returns the file's modification time.
+    pub fn mtime(&self) -> u64 {
+        self.mtime
     }
 }

@@ -899,10 +899,39 @@ impl DebPackage {
         let mut control_tar = tar::Builder::new(Vec::new());
         let mut data_tar = tar::Builder::new(Vec::new());
 
-        // Creating DebFile's from control and scripts
+        let mut hash = String::new();
+
+        // Adding files to data tar
+        for file in &self.data {
+            let mut file_header = tar::Header::new_gnu();
+            file_header.set_size(file.contents().len().try_into().unwrap());
+            file_header.set_mode(*file.mode());
+            file_header.set_mtime(file.mtime());
+            file_header.set_cksum();
+            // We have to strip the root directory if the path is absolute
+            // as the tar library doesn't allow absolute paths
+            if file.path().is_absolute() {
+                match file.path().strip_prefix("/") {
+                    Ok(path) => {
+                        data_tar.append_data(&mut file_header, path, file.contents().as_slice())?;
+                        hash.push_str(format!("{:x}  {}\n", md5::compute(file.contents().as_slice()), path.display()).as_str());
+                    }
+                    Err(e) => {
+                        return Err(Error::new(ErrorKind::Other, e));
+                    }
+                }
+            } else {
+                data_tar.append_data(&mut file_header, file.path(), file.contents().as_slice())?;
+                hash.push_str(format!("{:x}  {}", md5::compute(file.contents().as_slice()), file.path().display()).as_str());
+            }
+        }
+
+        // Creating DebFile's from control, md5sums and scripts
         let control_file = Some(DebFile::from_buf(self.control.serialize(), "control"));
+        let md5sums_file = Some(DebFile::from_buf(hash.into_bytes(), "md5sums"));
         let mut control_vec = vec![
             &control_file,
+            &md5sums_file,
             &self.config,
             &self.preinst,
             &self.postinst,
@@ -918,31 +947,9 @@ impl DebPackage {
             file_header.set_path(file.path())?;
             file_header.set_size(file.contents().len().try_into().unwrap());
             file_header.set_mode(*file.mode());
+            file_header.set_mtime(file.mtime());
             file_header.set_cksum();
             control_tar.append(&file_header, file.contents().as_slice())?;
-        }
-
-        // Adding files to data tar
-        for file in &self.data {
-            let mut file_header = tar::Header::new_gnu();
-            // We have to strip the root directory if the path is absolute
-            // as the tar library doesn't allow absolute paths
-            if file.path().is_absolute() {
-                match file.path().strip_prefix("/") {
-                    Ok(path) => {
-                        file_header.set_path(path)?;
-                    }
-                    Err(e) => {
-                        return Err(Error::new(ErrorKind::Other, e));
-                    }
-                }
-            } else {
-                file_header.set_path(file.path())?;
-            }
-            file_header.set_size(file.contents().len().try_into().unwrap());
-            file_header.set_mode(*file.mode());
-            file_header.set_cksum();
-            data_tar.append(&file_header, file.contents().as_slice())?;
         }
 
         // Compressing tar archives to DebArchive struct
